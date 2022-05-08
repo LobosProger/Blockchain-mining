@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using MyBox;
 using NaughtyAttributes;
 using System.Security.Cryptography;
@@ -17,24 +18,7 @@ public class Blockchain : MonoBehaviour
 	[ButtonMethod]
 	private void Mine()
 	{
-		Block addingBlock = new Block();
-		addingBlock.AssignDataToBlock(Data, BlockchainInfo);
-
-		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble;
-
-		int difficultyAmountOfNone = difficulty.Length;
-
-		addingBlock.MineTheBlock();
-		while (addingBlock.Hash.Substring(0, difficultyAmountOfNone) != difficulty)
-		{
-			addingBlock.MineTheBlock();
-		}
-
-		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble - addingBlock.TimeOfMining;
-		addingBlock.HashrateInSeconds = (addingBlock.nonce / addingBlock.TimeOfMining) * 1000;
-		BlockchainInfo.Add(addingBlock);
-
-		Debug.Log(addingBlock.ReturnHashData());
+		StartCoroutine(Mining());
 	}
 
 	[System.Serializable]
@@ -53,9 +37,8 @@ public class Blockchain : MonoBehaviour
 		public double TimeOfMining;
 		public double HashrateInSeconds;
 
-
 		private string connectedData;
-		private string hashingData;
+		public string hashingDataWithNonce;
 
 		public void AssignDataToBlock(string data, List<Block> blockchain)
 		{
@@ -71,13 +54,8 @@ public class Blockchain : MonoBehaviour
 		public void MineTheBlock()
 		{
 			nonce++;
-			hashingData = connectedData + nonce.ToString();
-			Hash = EncryptSHA256(ReturnHashData());
-		}
-
-		public string ReturnHashData()
-		{
-			return hashingData;
+			hashingDataWithNonce = connectedData + nonce.ToString();
+			Hash = EncryptSHA256(hashingDataWithNonce);
 		}
 
 		private string EncryptSHA256(string Data)
@@ -92,5 +70,40 @@ public class Blockchain : MonoBehaviour
 			}
 			return strBuilder.ToString();
 		}
+	}
+
+	IEnumerator Mining()
+	{
+		Block addingBlock = new Block();
+		addingBlock.AssignDataToBlock(Data, BlockchainInfo);
+
+		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble;
+		int difficultyAmountOfNone = difficulty.Length;
+
+		addingBlock.MineTheBlock();
+
+		ulong minedHashes = 0;
+		long totalBytesCleared = 0;
+		while (addingBlock.Hash.Substring(0, difficultyAmountOfNone) != difficulty)
+		{
+			addingBlock.MineTheBlock();
+			minedHashes++;
+
+			if (minedHashes > 1000000)
+			{
+				minedHashes = 0;
+				totalBytesCleared = GC.GetAllocatedBytesForCurrentThread();
+				GC.Collect();
+			}
+		}
+
+		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble - addingBlock.TimeOfMining;
+		addingBlock.HashrateInSeconds = (addingBlock.nonce / addingBlock.TimeOfMining) * 1000;
+		BlockchainInfo.Add(addingBlock);
+
+		Debug.Log(addingBlock.hashingDataWithNonce);
+		Debug.Log("Bytes: " + totalBytesCleared);
+
+		yield return null;
 	}
 }
