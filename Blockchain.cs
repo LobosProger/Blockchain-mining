@@ -11,21 +11,6 @@ public class Blockchain : MonoBehaviour
 	public string Data;
 	public List<Block> BlockchainInfo = new List<Block>();
 
-	private double time;
-	private bool startMining;
-
-	private void Update()
-	{
-		if (startMining)
-		{
-			if (Time.realtimeSinceStartupAsDouble - time >= 2d)
-			{
-				time = Time.realtimeSinceStartupAsDouble;
-				Mine();
-			}
-		}
-	}
-
 	[ButtonMethod]
 	private void Mine()
 	{
@@ -92,8 +77,4 @@ public class Blockchain : MonoBehaviour
 			return hashingData;
 		}
 	}
-	[ButtonMethod]
-	private void StartMining() => startMining = true;
-	[ButtonMethod]
-	private void StopMining() => startMining = false;
 }
