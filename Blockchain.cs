@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using MyBox;
 using NaughtyAttributes;
+using System.Security.Cryptography;
+using System.IO;
+using System.Text;
 [ExecuteAlways]
 public class Blockchain : MonoBehaviour
 {
@@ -10,21 +13,6 @@ public class Blockchain : MonoBehaviour
 	[ResizableTextArea]
 	public string Data;
 	public List<Block> BlockchainInfo = new List<Block>();
-
-	private double time;
-	private bool startMining;
-
-	private void Update()
-	{
-		if (startMining)
-		{
-			if (Time.realtimeSinceStartupAsDouble - time >= 2d)
-			{
-				time = Time.realtimeSinceStartupAsDouble;
-				Mine();
-			}
-		}
-	}
 
 	[ButtonMethod]
 	private void Mine()
@@ -84,16 +72,25 @@ public class Blockchain : MonoBehaviour
 		{
 			nonce++;
 			hashingData = connectedData + nonce.ToString();
-			Hash = LobosRoboticsFunctions.EncryptSHA256(ReturnHashData());
+			Hash = EncryptSHA256(ReturnHashData());
 		}
 
 		public string ReturnHashData()
 		{
 			return hashingData;
 		}
+
+		private string EncryptSHA256(string Data)
+		{
+			SHA256 sha256 = new SHA256CryptoServiceProvider();
+			sha256.ComputeHash(ASCIIEncoding.ASCII.GetBytes(Data));
+			byte[] result = sha256.Hash;
+			StringBuilder strBuilder = new StringBuilder();
+			for (int i = 0; i < result.Length; i++)
+			{
+				strBuilder.Append(result[i].ToString("x2"));
+			}
+			return strBuilder.ToString();
+		}
 	}
-	[ButtonMethod]
-	private void StartMining() => startMining = true;
-	[ButtonMethod]
-	private void StopMining() => startMining = false;
 }
