@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading;
 using System;
 using MyBox;
 using NaughtyAttributes;
 using System.Security.Cryptography;
-using System.IO;
 using System.Text;
-[ExecuteAlways]
 public class Blockchain : MonoBehaviour
 {
 	public string difficulty = "0";
@@ -15,13 +14,10 @@ public class Blockchain : MonoBehaviour
 	public string Data;
 	public List<Block> BlockchainInfo = new List<Block>();
 
-	[ButtonMethod]
-	private void Mine()
-	{
-		StartCoroutine(Mining());
-	}
+	private Block currentMiningBlock;
+	private int currentAmountDifficulty;
 
-	[System.Serializable]
+	[Serializable]
 	public struct Block
 	{
 		public int block;
@@ -51,11 +47,10 @@ public class Blockchain : MonoBehaviour
 			connectedData = block.ToString() + data + previousHash;
 		}
 
-		public void MineTheBlock()
+		public string MineTheBlock(ulong Nonce)
 		{
-			nonce++;
-			hashingDataWithNonce = connectedData + nonce.ToString();
-			Hash = EncryptSHA256(hashingDataWithNonce);
+			hashingDataWithNonce = connectedData + Nonce.ToString();
+			return EncryptSHA256(hashingDataWithNonce);
 		}
 
 		private string EncryptSHA256(string Data)
@@ -72,38 +67,162 @@ public class Blockchain : MonoBehaviour
 		}
 	}
 
-	IEnumerator Mining()
+	[SerializeField]
+	private bool Mine;
+	private bool StartedMining;
+	private bool ClearedGarbage = true;
+
+	private ulong rightNonce = 0;
+	private string rightHash;
+
+	Thread t1; private ulong nonce1 = 0; private ulong nonce1 = 0; private string hash1;
+	Thread t2; private ulong nonce2 = 0; private string hash2;
+	Thread t3; private ulong nonce3 = 0; private string hash3;
+	Thread t4; private ulong nonce4 = 0; private string hash4;
+
+	private void Start()
 	{
-		Block addingBlock = new Block();
-		addingBlock.AssignDataToBlock(Data, BlockchainInfo);
+		t1 = new Thread(MineMultiThread1);
+		t2 = new Thread(MineMultiThread2);
+		t3 = new Thread(MineMultiThread3);
+		t4 = new Thread(MineMultiThread4);
 
-		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble;
-		int difficultyAmountOfNone = difficulty.Length;
-
-		addingBlock.MineTheBlock();
-
-		ulong minedHashes = 0;
-		long totalBytesCleared = 0;
-		while (addingBlock.Hash.Substring(0, difficultyAmountOfNone) != difficulty)
+		StartCoroutine(ClearNonAlloc());
+	}
+	private void Update()
+	{
+		if (ClearedGarbage)
 		{
-			addingBlock.MineTheBlock();
-			minedHashes++;
-
-			if (minedHashes > 1000000)
+			if (Mine)
 			{
-				minedHashes = 0;
-				totalBytesCleared = GC.GetAllocatedBytesForCurrentThread();
-				GC.Collect();
+				if (!StartedMining)
+				{
+					currentMiningBlock.AssignDataToBlock(Data, BlockchainInfo);
+					currentMiningBlock.TimeOfMining = Time.timeAsDouble;
+					currentAmountDifficulty = difficulty.Length;
+
+					StartedMining = true;
+				}
+
+				if (!t1.IsAlive)
+				{
+					t1.Start();
+					t2.Start();
+					t3.Start();
+					t4.Start();
+				}
+
+				/*localNonce += 200000;
+
+				Thread t2 = new Thread(MineMultiThread);
+				t2.Start();*/
+
+
+				/*for (int i = 1; i <= 200000; i++)
+				{
+					if (currentMiningBlock.Hash.Substring(0, currentAmountDifficulty) == difficulty)
+					{
+						Mine = false;
+						StartedMining = false;
+
+						localNonce = 1;
+						break;
+					}
+					else
+						currentMiningBlock.MineTheBlock();
+				}*/
+
+				/*if (!Mine)
+				{
+					
+				}*/
+
+
 			}
 		}
 
-		addingBlock.TimeOfMining = Time.realtimeSinceStartupAsDouble - addingBlock.TimeOfMining;
-		addingBlock.HashrateInSeconds = (addingBlock.nonce / addingBlock.TimeOfMining) * 1000;
-		BlockchainInfo.Add(addingBlock);
+		if (rightNonce != 0)
+		{
+			rightNonce = 0;
+			FinishedMining();
+		}
+	}
 
-		Debug.Log(addingBlock.hashingDataWithNonce);
-		Debug.Log("Bytes: " + totalBytesCleared);
+	private IEnumerator ClearNonAlloc()
+	{
+		ClearedGarbage = false;
+		GC.Collect();
+		GC.WaitForPendingFinalizers();
+		yield return new WaitForSecondsRealtime(1f);
 
-		yield return null;
+		if (Mine)
+			Debug.Log("Hashrate: " + (currentMiningBlock.nonce / (Time.timeAsDouble - currentMiningBlock.TimeOfMining)) * 1000 + " H/s");
+		ClearedGarbage = true;
+
+		yield return new WaitForSecondsRealtime(1f);
+		StartCoroutine(ClearNonAlloc());
+	}
+
+	private void MineMultiThread1() => ProccessOfMining(1);
+	private void MineMultiThread2() => ProccessOfMining(2);
+	private void MineMultiThread3() => ProccessOfMining(3);
+	private void MineMultiThread4() => ProccessOfMining(4);
+
+	private void ProccessOfMining(int x)
+	{
+		ulong startNonce, maxNonce;
+
+		if (x == 1)
+		{
+			startNonce = 0;
+			maxNonce = 200000;
+		}
+		if (x == 2)
+		{
+			startNonce = 200000;
+			maxNonce = 400000;
+		}
+		if (x == 3)
+		{
+			startNonce = 400000;
+			maxNonce = 600000;
+		}
+		if (x == 4)
+		{
+			startNonce = 600000;
+			maxNonce = 800000;
+		}
+
+		while (true)
+		{
+			for (ulong i = startNonce; i <= maxNonce; i++)
+			{
+				if (rightNonce == 0 && Mine && currentMiningBlock.Hash.Substring(0, currentAmountDifficulty) == difficulty)
+				{
+					currentMiningBlock.nonce = i;
+					rightNonce = i;
+					Mine = false;
+					break;
+				}
+				else if (!Mine)
+					break;
+				else
+					currentMiningBlock.MineTheBlock(i);
+			}
+
+			while (!Mine || !ClearedGarbage || !StartedMining) { }
+		}
+	}
+
+	private void FinishedMining()
+	{
+		Mine = false;
+		StartedMining = false;
+
+		currentMiningBlock.TimeOfMining = Time.timeAsDouble - currentMiningBlock.TimeOfMining;
+		currentMiningBlock.HashrateInSeconds = (currentMiningBlock.nonce / currentMiningBlock.TimeOfMining) * 1000;
+		BlockchainInfo.Add(currentMiningBlock);
+
+		Debug.Log(currentMiningBlock.hashingDataWithNonce);
 	}
 }
