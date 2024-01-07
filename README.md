@@ -1,15 +1,19 @@
-# Blockchain-mining
-Уникальный скрипт, реализующий работу майнинга прямо в Unity!
+### Unity Blockchain Mining Script
 
-* Данный код реализует почти полноценную работу блокчейна с майнингом. Однако распространение информации и самой базы данных не предусмотрено. Код написан лишь для ознакомления работы майнинга, то как он устроен и работает. 
-* Для работы этого скрипта просто создайте пустой игровой объект, добавьте к нему данный скрипт. Теперь в поле Data впишите любой текст - что угодно, а в поле Difficulty впишите символы из 16-ричной системы счисления маленькими буквами. Это требуется для того, чтобы задать правило намайненного блока. Можно вписать например просто нули - как в системе Биткоин (например, два нуля, т.е. в поле Difficulty будет выглядеть следующая запись: "00"). Теперь нажмите на кнопку Mine, чтобы сгенерировать намайненный блок. 
-* Подождите немного и после этого в Blockchain Info появится новая запись, где состоит из: 
-* Block (номер блока) 
-* Nonce (случайного числа, требуемого для майнинга блока)
-* Data (данные, которые Вы вписали в поле Data) 
-* Previous Hash (В блокчейне все блоки соединены с помощью предыдущего хэша)
-* Hash (подобранный хэш согласно правилу)
-* Time Of Mining (время майнинга (указано в секундах))
-* Hashrate In Seconds (хэшрейт вашего компьютера в секундах, то есть количество подбираемых хэшей в секунду)
+This unique script implements mining directly within Unity!
 
-* После майнинга в вкладке Console появится новая запись - эта та самая запись, которая помещается в алгоритм SHA256 для подбора нужного хэша по правилу. Вы можете скопировать данную строку данных и вставить в онлайн сервис по вычислению SHA256 (например, https://emn178.github.io/online-tools/sha256.html) для того, чтобы удостовериться в работе данного алгоритма майнинга (например, я выставил в поле Difficulty: 00, нажал на кнопку Mine и появилась следующая запись в Console "1The Lobos Robotics NFT. All rights reserved.01" (кавычки НЕ нужно копировать отсюда), вставив в поле Input получаем следующую запись: "00b93e033b278155946fc451304a2aec970fc9fc01401b4897f2cd913aec975f", т.е. я выставил правило майнинга, которое вычисляет хэш по двум нулям)
+The code provides almost complete blockchain functionality with mining. However, information distribution and the database itself are not included. The code is intended for understanding the workings of mining, its structure, and functionality.
+
+To use this script, create an empty game object, attach the script to it, and fill in any text in the "Data" field. In the "Difficulty" field, input lowercase hexadecimal characters. This defines the rule for the mined block. For example, entering zeros (e.g., "00") is akin to the Bitcoin system. Now press the "Mine" button to generate a mined block.
+
+Wait a moment, and a new entry will appear in the Blockchain Info, consisting of:
+
+- Block (block number)
+- Nonce (random number required for block mining)
+- Data (data you entered in the "Data" field)
+- Previous Hash (blocks in the blockchain are connected via the previous hash)
+- Hash (hashed according to the rule)
+- Time Of Mining (mining time, specified in seconds)
+- Hashrate In Seconds (your computer's hashrate per second, i.e., the number of hashes attempted per second)
+
+After mining, a new entry will appear in the Console tab. This entry is the one fed into the SHA256 algorithm to find the desired hash based on the rule. You can copy this data string and paste it into an online SHA256 calculation service (e.g., [online SHA256 calculator](https://emn178.github.io/online-tools/sha256.html)) to verify the mining algorithm's operation. For example, if you set the Difficulty field to "00," pressed the Mine button, and the Console displayed "1The Lobos Robotics NFT. All rights reserved.01" (do not copy quotes), inputting this string into the online tool should yield "00b93e033b278155946fc451304a2aec970fc9fc01401b4897f2cd913aec975f." This demonstrates the mining rule that computes a hash with two leading zeros.
