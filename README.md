@@ -21,7 +21,9 @@ After mining, a new entry will appear in the Console tab. This entry is the one 
 ## Screenshots of work
 Setup of script (in data I place anything and in difficulty I set number of zeros, as in Bitcoin system):
 
-<img src="https://github.com/LobosProger/Blockchain-mining/assets/78168123/acc5f500-ac41-417f-ba2e-e4d84ebde95e" align="center">
+<p align="center"
+<img src="https://github.com/LobosProger/Blockchain-mining/assets/78168123/acc5f500-ac41-417f-ba2e-e4d84ebde95e">
+</p>
 
 Clicking on the bool Mining just wait and see created block in blockchain:
 
