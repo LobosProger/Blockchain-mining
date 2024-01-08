@@ -27,10 +27,14 @@ Setup of script (in data I place anything and in difficulty I set number of zero
 
 Clicking on the bool Mining just wait and see created block in blockchain:
 
+<div align="center"
 ![Screenshot 2024-01-09 003948](https://github.com/LobosProger/Blockchain-mining/assets/78168123/4861cb30-38de-4bfc-b35a-6a7550316923)
+</div>
 
 Now I can change difficulty (like set more zeros, but need to wait to creation new block of data). As you can see, it also linking on previous block in blockchain:
 
+<div align="center"
 ![Screenshot 2024-01-09 004015](https://github.com/LobosProger/Blockchain-mining/assets/78168123/22d1549d-36df-468d-ba66-b31ad4e0489e)
+</div>
 
 Last line (Hashing data) representing, which combination data is getting needing hash with setted difficulty (with starting specific amount of zeros)
